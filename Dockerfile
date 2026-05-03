@@ -16,9 +16,6 @@ COPY . .
 # Install dependencies
 RUN composer install
 
-# Generate key & run migrations (optional, safer to run manually)
-RUN php artisan key:generate
-
 # Expose port
 EXPOSE 10000
 
