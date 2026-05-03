@@ -17,10 +17,21 @@ class TaskController extends Controller
         $query = Task::query();
 
         if($request->status) {
-            $query->where('status', $request->status);
+            if($request->status === 'all') {
+                $query->whereIn('status', ['pending', 'in-progress', 'completed']);
+            } else {
+                $query->where('status', $request->status);
+            }
         }
 
-        $tasks = $query->latest()->paginate(10);
+        if($request->search) {
+            $query->where(function($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search . '%')
+                  ->orWhere('description', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        $tasks = $query->latest()->paginate(5);
 
         return response()->json([
             'status' => 'success',
@@ -119,8 +130,14 @@ class TaskController extends Controller
      */
     public function toggleStatus(Task $task) {
         try {
-            $task->status = $task->status === 'pending' ? 'completed' : 'pending';
+            $task->status = ($task->status === 'pending' || $task->status === 'in-progress') ? 'completed' : 'pending';
             $task->save();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Task status toggled successfully',
+                'data' => $task
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Task not found'], 404);
         }

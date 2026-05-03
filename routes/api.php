@@ -5,4 +5,4 @@ use Illuminate\Support\Facades\Route;
 
 Route::apiResource('tasks', TaskController::class);
 
-Route::patch('tasks/{task}/status', [TaskController::class, 'toggleStatus']);
+Route::patch('tasks/{task}/toggle', [TaskController::class, 'toggleStatus']);
